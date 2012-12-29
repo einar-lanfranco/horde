@@ -112,6 +112,53 @@ class IMP_Auth
 
         return $result;
     }
+    /**
+     * Reauthenticate to the mail server using new credentials.
+     *
+     * @param array $credentials  An array of login credentials. If empty,
+     *                            attempts to login to the cached session.
+     *   - password: (string) The user password.
+     *   - server: (string) The server key to use (from backends.php).
+     *   - userId: (string) The username.
+     *
+     * @return mixed  If authentication was successful, and no session
+     *                exists, an array of data to add to the session.
+     *                Otherwise returns false.
+     * @throws Horde_Auth_Exception
+     */
+    static public function reauthenticate($credentials = array())
+    {
+        global $injector, $registry;
+
+        $imp_imap_factory = $injector->getInstance('IMP_Factory_Imap');
+        $imp_imap = $imp_imap_factory->create($credentials['server']);
+
+        if ($imp_imap->ob) {
+            $imp_imap->ob->shutdown();
+            $imp_imap->ob = null;
+        }
+        try {
+            $imp_imap->createImapObject($credentials['userId'], $credentials['password'], $credentials['server']);
+        } catch (IMP_Imap_Exception $e) {
+            self::_log(false, $imp_imap);
+            throw $e->authException();
+        }
+
+        $result = array(
+            'server_key' => $credentials['server']
+        );
+
+        try {
+            $imp_imap->login();
+            $imp_imap_factory->defaultID = $credentials['server'];
+        } catch (IMP_Imap_Exception $e) {
+            self::_log(false, $imp_imap);
+            throw $e->authException();
+        }
+
+        return $result;
+
+    }
 
     /**
      * Perform transparent authentication.

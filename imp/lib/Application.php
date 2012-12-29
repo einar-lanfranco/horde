@@ -377,6 +377,26 @@ class IMP_Application extends Horde_Registry_Application
             'userId' => $userId
         )));
     }
+    /**
+     * @param array $credentials  Credentials of the user. Allowed keys:
+     *                            'imp_server_key', 'password'.
+     */
+    public function authReauthenticate($userId, $credentials)
+    {
+        if (isset($credentials['server'])) {
+            $server = $credentials['server'];
+        } else {
+            $server = empty($credentials['imp_server_key'])
+                ? IMP_Auth::getAutoLoginServer()
+                : $credentials['imp_server_key'];
+        }
+
+        $this->_addSessVars(IMP_Auth::reauthenticate(array(
+            'password' => $credentials['password'],
+            'server' => $server,
+            'userId' => $userId
+        )));
+    }
 
     /**
      */
