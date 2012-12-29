@@ -330,6 +330,23 @@ class Horde_Registry_Application
     }
 
     /**
+     * Code to run if the authentication credentials have changed after authentication.
+     *
+     * Tries to reauthenticate with the server and create a session,
+     * ignoring existing sessions and cached credentials.
+     * Any session variables you want added should be set by calling
+     * _addSessVars() internally within this method.
+     *
+     * @param string $userId      The username of the user.
+     * @param array $credentials  Credentials of the user.
+     *
+     * @throws Horde_Auth_Exception
+     */
+    public function authReauthenticate()
+    {
+    }
+
+    /**
      * Adds a user defined by authentication credentials.
      *
      * @param string $userId      The user ID to add.
