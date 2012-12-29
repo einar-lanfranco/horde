@@ -99,8 +99,12 @@ class Passwd
      */
     static public function resetCredentials($old_password, $new_password)
     {
+        $userId = $GLOBALS['registry']->getAuth();
         if ($GLOBALS['registry']->getAuthCredential('password') == $old_password) {
             $GLOBALS['registry']->setAuthCredential('password', $new_password);
+            foreach ($GLOBALS['registry']->listApps() as $app) {
+                $GLOBALS['registry']->callAppMethod($app, 'authReauthenticate', array('args' => array($userId, array('password' => $new_password))));
+            }
         }
     }
 }
